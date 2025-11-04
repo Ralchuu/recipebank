@@ -1,0 +1,76 @@
+package hh.recipebank.recipebank.web;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
+import hh.recipebank.recipebank.domain.*;
+import java.util.ArrayList;
+
+@Controller
+public class RecipeController {
+
+    @Autowired
+    private RecipeRepository recipeRepository;
+
+    // Listaa reseptit
+    @GetMapping("/")
+    public String listRecipes(Model model) {
+        model.addAttribute("recipes", recipeRepository.findAll());
+        return "recipelist";
+    }
+
+    // Näytä lomake uuden reseptin lisäämiseksi
+    @GetMapping("/add")
+    public String addRecipeForm(Model model) {
+        Recipe recipe = new Recipe();
+        recipe.setIngredients(new ArrayList<>());
+        recipe.getIngredients().add(new Ingredient()); // yksi tyhjä rivi valmiiksi
+        model.addAttribute("recipe", recipe);
+        return "addrecipe";
+    }
+
+    @PostMapping("/save")
+public String saveRecipe(@ModelAttribute Recipe recipe) {
+    if (recipe.getIngredients() != null) {
+        // Poistetaan tyhjät rivit
+        recipe.getIngredients().removeIf(i -> 
+            (i.getName() == null || i.getName().isBlank()) &&
+            (i.getAmount() == null || i.getAmount().isBlank()) &&
+            (i.getUnit() == null || i.getUnit().isBlank())
+        );
+
+        // Liitetään resepti kaikille ainesosille
+        recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
+    }
+
+    recipeRepository.save(recipe);
+    return "redirect:/recipe/" + recipe.getRecipeId();
+}
+
+
+    // Muokkaa reseptiä
+    @GetMapping("/edit/{id}")
+    public String editRecipe(@PathVariable("id") Long id, Model model) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid recipe ID:" + id));
+        model.addAttribute("recipe", recipe);
+        return "editrecipe";
+    }
+
+    // Poista resepti
+    @GetMapping("/delete/{id}")
+    public String deleteRecipe(@PathVariable("id") Long id) {
+        recipeRepository.deleteById(id);
+        return "redirect:/";
+    }
+
+    // Näytä yksittäinen resepti
+    @GetMapping("/recipe/{id}")
+    public String viewRecipe(@PathVariable("id") Long id, Model model) {
+        Recipe recipe = recipeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid recipe ID:" + id));
+        model.addAttribute("recipe", recipe);
+        return "recipesingle";
+    }
+}

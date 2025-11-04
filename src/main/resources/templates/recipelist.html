@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Reseptit</title>
+</head>
+<body>
+
+<h1>Reseptit</h1>
+<a href="/add">Lisää resepti</a>
+
+<table border="1">
+    <thead>
+        <tr>
+            <th>Otsikko</th>
+            <th>Kuvaus</th>
+            <th>Toiminnot</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="r : ${recipes}">
+            <td th:text="${r.title}">Otsikko</td>
+            <td th:text="${r.description}">Kuvaus</td>
+            <td>
+                <a th:href="@{/recipe/{id}(id=${r.recipeId})}">Näytä</a>
+                &nbsp;|&nbsp;
+                <a th:href="@{/delete/{id}(id=${r.recipeId})}">Poista</a>
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+</body>
+</html>

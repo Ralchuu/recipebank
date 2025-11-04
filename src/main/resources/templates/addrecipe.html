@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lisää resepti</title>
+    <script>
+        let ingredientIndex = 0;
+
+        function addIngredient(name = '', amount = '', unit = '') {
+            const container = document.getElementById('ingredients-container');
+            const div = document.createElement('div');
+            div.innerHTML = `
+                <input type="text" name="ingredients[${ingredientIndex}].name" placeholder="Nimi" value="${name}" required>
+                <input type="text" name="ingredients[${ingredientIndex}].amount" placeholder="Määrä" value="${amount}" required>
+                <input type="text" name="ingredients[${ingredientIndex}].unit" placeholder="Yksikkö" value="${unit}" required>
+                <button type="button" onclick="this.parentElement.remove()">Poista</button>
+            `;
+            container.appendChild(div);
+            ingredientIndex++;
+        }
+
+        window.onload = function() {
+            ingredientIndex = document.getElementById('ingredients-container').children.length;
+        };
+    </script>
+</head>
+<body>
+
+<h1>Lisää resepti</h1>
+
+<form th:action="@{/save}" th:object="${recipe}" method="post">
+    <p>
+        <label>Otsikko: <input type="text" th:field="*{title}" required></label>
+    </p>
+    <p>
+        <label>Kuvaus: <input type="text" th:field="*{description}" required></label>
+    </p>
+    <p>
+        <label>Ohje: <textarea th:field="*{instruction}" required></textarea></label>
+    </p>
+
+    <h3>Ainesosat</h3>
+    <div id="ingredients-container">
+        <div th:each="ing, stat : *{ingredients}">
+            <input type="text" th:name="'ingredients[' + ${stat.index} + '].name'" th:value="${ing.name}" placeholder="Nimi" required>
+            <input type="text" th:name="'ingredients[' + ${stat.index} + '].amount'" th:value="${ing.amount}" placeholder="Määrä" required>
+            <input type="text" th:name="'ingredients[' + ${stat.index} + '].unit'" th:value="${ing.unit}" placeholder="Yksikkö" required>
+            <button type="button" onclick="this.parentElement.remove()">Poista</button>
+        </div>
+    </div>
+
+    <button type="button" onclick="addIngredient()">Lisää ainesosa</button>
+
+    <p><button type="submit">Tallenna resepti</button></p>
+</form>
+
+<a href="/">Takaisin listaan</a>
+
+</body>
+</html>

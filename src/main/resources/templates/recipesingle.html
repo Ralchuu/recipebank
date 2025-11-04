@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Resepti</title>
+</head>
+<body>
+
+<h1 th:text="${recipe.title}">Reseptin otsikko</h1>
+
+<h2>Ainesosat</h2>
+<ul>
+    <li th:each="ing : ${recipe.ingredients}">
+        <span th:text="${ing.amount} + ' ' + ${ing.unit} + ' ' + ${ing.name}"></span>
+    </li>
+</ul>
+
+<p><strong>Kuvaus:</strong> <span th:text="${recipe.description}"></span></p>
+<p><strong>Ohje:</strong></p>
+<p th:text="${recipe.instruction}"></p>
+<p><strong>Luotu:</strong> <span th:text="${recipe.createdAt}"></span></p>
+
+<br>
+
+<a href="/">Takaisin listaan</a> |
+<a th:href="@{/edit/{id}(id=${recipe.recipeId})}">Muokkaa</a>
+
+</body>
+</html>
