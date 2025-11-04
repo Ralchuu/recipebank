@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lisää käyttäjä</title>
+</head>
+<body>
+
+<h1>Lisää käyttäjä</h1>
+
+<form th:action="@{/users/save}" th:object="${user}" method="post">
+    <p>
+        <label>Käyttäjätunnus: <input type="text" th:field="*{username}" required></label>
+    </p>
+    <p>
+        <label>Sähköposti: <input type="email" th:field="*{email}" required></label>
+    </p>
+    <p>
+        <label>Salasana: <input type="password" th:field="*{password}" required></label>
+    </p>
+    <p><button type="submit">Tallenna käyttäjä</button></p>
+</form>
+
+<a href="/users">Takaisin käyttäjien listaan</a>
+
+</body>
+</html>

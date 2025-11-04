@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Käyttäjät</title>
+</head>
+<body>
+
+<h1>Käyttäjät</h1>
+
+<table>
+    <tr>
+        <th>ID</th>
+        <th>Käyttäjätunnus</th>
+        <th>Sähköposti</th>
+        <th>Toiminnot</th>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.userId}">1</td>
+        <td th:text="${user.username}">username</td>
+        <td th:text="${user.email}">email@example.com</td>
+        <td>
+            <a th:href="@{/users/delete/{id}(id=${user.userId})}">Poista</a>
+        </td>
+    </tr>
+</table>
+
+<a href="/users/add">Lisää uusi käyttäjä</a>
+
+</body>
+</html>

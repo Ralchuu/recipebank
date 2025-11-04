@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import hh.recipebank.recipebank.domain.*;
 import java.util.ArrayList;
+import java.util.NoSuchElementException;
 
 @Controller
 public class RecipeController {
@@ -30,30 +31,37 @@ public class RecipeController {
         return "addrecipe";
     }
 
+    // Tallenna resepti
     @PostMapping("/save")
-public String saveRecipe(@ModelAttribute Recipe recipe) {
-    if (recipe.getIngredients() != null) {
-        // Poistetaan tyhjät rivit
-        recipe.getIngredients().removeIf(i -> 
-            (i.getName() == null || i.getName().isBlank()) &&
-            (i.getAmount() == null || i.getAmount().isBlank()) &&
-            (i.getUnit() == null || i.getUnit().isBlank())
-        );
+    public String saveRecipe(@ModelAttribute("recipe") Recipe recipe) {
+        if (recipe == null) {
+            throw new IllegalArgumentException("Recipe cannot be null");
+        }
 
-        // Liitetään resepti kaikille ainesosille
-        recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
+        if (recipe.getIngredients() != null) {
+            // Poistetaan tyhjät rivit
+            recipe.getIngredients().removeIf(i ->
+                (i.getName() == null || i.getName().isBlank()) &&
+                (i.getAmount() == null || i.getAmount().isBlank()) &&
+                (i.getUnit() == null || i.getUnit().isBlank())
+            );
+
+            // Liitetään resepti kaikille ainesosille
+            recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
+        }
+
+        recipeRepository.save(recipe);
+        return "redirect:/recipe/" + recipe.getRecipeId();
     }
-
-    recipeRepository.save(recipe);
-    return "redirect:/recipe/" + recipe.getRecipeId();
-}
-
 
     // Muokkaa reseptiä
     @GetMapping("/edit/{id}")
     public String editRecipe(@PathVariable("id") Long id, Model model) {
+        if (id == null || !recipeRepository.existsById(id)) {
+            throw new NoSuchElementException("Invalid recipe ID: " + id);
+        }
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid recipe ID:" + id));
+                .orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
         model.addAttribute("recipe", recipe);
         return "editrecipe";
     }
@@ -61,6 +69,9 @@ public String saveRecipe(@ModelAttribute Recipe recipe) {
     // Poista resepti
     @GetMapping("/delete/{id}")
     public String deleteRecipe(@PathVariable("id") Long id) {
+        if (id == null || !recipeRepository.existsById(id)) {
+            throw new NoSuchElementException("Invalid recipe ID: " + id);
+        }
         recipeRepository.deleteById(id);
         return "redirect:/";
     }
@@ -68,8 +79,11 @@ public String saveRecipe(@ModelAttribute Recipe recipe) {
     // Näytä yksittäinen resepti
     @GetMapping("/recipe/{id}")
     public String viewRecipe(@PathVariable("id") Long id, Model model) {
+        if (id == null || !recipeRepository.existsById(id)) {
+            throw new NoSuchElementException("Invalid recipe ID: " + id);
+        }
         Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid recipe ID:" + id));
+                .orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
         model.addAttribute("recipe", recipe);
         return "recipesingle";
     }
