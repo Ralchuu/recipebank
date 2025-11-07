@@ -1,7 +1,6 @@
 package hh.recipebank.recipebank;
 
 import hh.recipebank.recipebank.domain.*;
-import java.util.Random;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;

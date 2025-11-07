@@ -31,6 +31,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 .requestMatchers("/editrecipe/**", "/deleterecipe/**").hasRole("ADMIN")
                 .requestMatchers("/reviews/delete/**").hasRole("ADMIN")
                 .requestMatchers("/users/**").hasRole("ADMIN")
+                .requestMatchers("/h2-console/**").permitAll()
                 .anyRequest().permitAll()
         )
         .formLogin(form -> form
@@ -43,6 +44,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 .permitAll()
         )
         .csrf(csrf -> csrf.disable());
+        http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
+
 
     return http.build();
     }
