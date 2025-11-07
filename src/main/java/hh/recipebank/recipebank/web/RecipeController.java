@@ -1,6 +1,7 @@
 package hh.recipebank.recipebank.web;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,8 @@ public class RecipeController {
     }
 
     // Näytä lomake uuden reseptin lisäämiseksi
-    @GetMapping("/add")
+    @GetMapping("/addrecipe")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public String addRecipeForm(Model model) {
         Recipe recipe = new Recipe();
         recipe.setIngredients(new ArrayList<>());
@@ -32,7 +34,8 @@ public class RecipeController {
     }
 
     // Tallenna resepti
-    @PostMapping("/save")
+    @PostMapping("/addrecipe")
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     public String saveRecipe(@ModelAttribute("recipe") Recipe recipe) {
         if (recipe == null) {
             throw new IllegalArgumentException("Recipe cannot be null");
@@ -55,7 +58,8 @@ public class RecipeController {
     }
 
     // Muokkaa reseptiä
-    @GetMapping("/edit/{id}")
+    @GetMapping("/editrecipe/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String editRecipe(@PathVariable("id") Long id, Model model) {
         if (id == null || !recipeRepository.existsById(id)) {
             throw new NoSuchElementException("Invalid recipe ID: " + id);
@@ -67,7 +71,8 @@ public class RecipeController {
     }
 
     // Poista resepti
-    @GetMapping("/delete/{id}")
+    @GetMapping("/deleterecipe/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public String deleteRecipe(@PathVariable("id") Long id) {
         if (id == null || !recipeRepository.existsById(id)) {
             throw new NoSuchElementException("Invalid recipe ID: " + id);

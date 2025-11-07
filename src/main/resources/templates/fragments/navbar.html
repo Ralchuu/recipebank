@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security6">
+<head>
+</head>
+<body>
+    <nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="/">Reseptipankki</a>
+            
+            <div class="d-flex align-items-center">
+                <div sec:authorize="hasRole('ADMIN')" class="me-3">
+                    <a th:href="@{/users}" class="btn btn-outline-light btn-sm">Käyttäjänhallinta</a>
+                </div>
+                <div sec:authorize="isAuthenticated()" class="me-3">
+                    <span class="text-white me-3">Kirjautunut: <span sec:authentication="name"></span></span>
+                    <form th:action="@{/logout}" method="post" class="d-inline">
+                        <button class="btn btn-outline-light btn-sm">Kirjaudu ulos</button>
+                    </form>
+                </div>
+                <div sec:authorize="!isAuthenticated()">
+                    <a th:href="@{/login}" class="btn btn-outline-light btn-sm">Kirjaudu sisään</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>

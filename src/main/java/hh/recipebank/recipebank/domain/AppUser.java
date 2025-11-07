@@ -12,8 +12,8 @@ public class AppUser {
 
     private String username;
     private String password;
-    private String email; // lisätty email-kenttä
-    private String role; // esim. "USER" tai "ADMIN"
+    private String email;
+    private String role; // "ROLE_USER" tai "ROLE_ADMIN"
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Review> reviews;

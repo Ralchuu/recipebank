@@ -3,17 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Lisää resepti</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <script>
         let ingredientIndex = 0;
 
         function addIngredient(name = '', amount = '', unit = '') {
             const container = document.getElementById('ingredients-container');
             const div = document.createElement('div');
+            div.classList.add('row', 'g-2', 'align-items-center', 'mb-2');
             div.innerHTML = `
-                <input type="text" name="ingredients[${ingredientIndex}].name" placeholder="Nimi" value="${name}" required>
-                <input type="text" name="ingredients[${ingredientIndex}].amount" placeholder="Määrä" value="${amount}" required>
-                <input type="text" name="ingredients[${ingredientIndex}].unit" placeholder="Yksikkö" value="${unit}" required>
-                <button type="button" onclick="this.parentElement.remove()">Poista</button>
+                <div class="col-md-4">
+                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].name" placeholder="Nimi" value="${name}" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].amount" placeholder="Määrä" value="${amount}" required>
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].unit" placeholder="Yksikkö" value="${unit}" required>
+                </div>
+                <div class="col-md-2 text-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.row').remove()">Poista</button>
+                </div>
             `;
             container.appendChild(div);
             ingredientIndex++;
@@ -24,37 +37,63 @@
         };
     </script>
 </head>
-<body>
 
-<h1>Lisää resepti</h1>
+<body class="bg-light">
 
-<form th:action="@{/save}" th:object="${recipe}" method="post">
-    <p>
-        <label>Otsikko: <input type="text" th:field="*{title}" required></label>
-    </p>
-    <p>
-        <label>Kuvaus: <input type="text" th:field="*{description}" required></label>
-    </p>
-    <p>
-        <label>Ohje: <textarea th:field="*{instruction}" required></textarea></label>
-    </p>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
-    <h3>Ainesosat</h3>
-    <div id="ingredients-container">
-        <div th:each="ing, stat : *{ingredients}">
-            <input type="text" th:name="'ingredients[' + ${stat.index} + '].name'" th:value="${ing.name}" placeholder="Nimi" required>
-            <input type="text" th:name="'ingredients[' + ${stat.index} + '].amount'" th:value="${ing.amount}" placeholder="Määrä" required>
-            <input type="text" th:name="'ingredients[' + ${stat.index} + '].unit'" th:value="${ing.unit}" placeholder="Yksikkö" required>
-            <button type="button" onclick="this.parentElement.remove()">Poista</button>
+<div class="container">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="mb-4">Lisää uusi resepti</h2>
+
+            <form th:action="@{/addrecipe}" th:object="${recipe}" method="post">
+                <div class="mb-3">
+                    <label class="form-label">Otsikko</label>
+                    <input type="text" class="form-control" th:field="*{title}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Kuvaus</label>
+                    <input type="text" class="form-control" th:field="*{description}" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Ohje</label>
+                    <textarea class="form-control" th:field="*{instruction}" rows="4" required></textarea>
+                </div>
+
+                <h4 class="mb-3">Ainesosat</h4>
+                <div id="ingredients-container">
+                    <div class="row g-2 align-items-center mb-2" th:each="ing, stat : *{ingredients}">
+                        <div class="col-md-4">
+                            <input type="text" class="form-control" th:name="'ingredients[' + ${stat.index} + '].name'" th:value="${ing.name}" placeholder="Nimi" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" th:name="'ingredients[' + ${stat.index} + '].amount'" th:value="${ing.amount}" placeholder="Määrä" required>
+                        </div>
+                        <div class="col-md-3">
+                            <input type="text" class="form-control" th:name="'ingredients[' + ${stat.index} + '].unit'" th:value="${ing.unit}" placeholder="Yksikkö" required>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.row').remove()">Poista</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <button type="button" class="btn btn-outline-success btn-sm" onclick="addIngredient()">+ Lisää ainesosa</button>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a class="btn btn-secondary" href="/">← Takaisin listaan</a>
+                    <button type="submit" class="btn btn-primary">💾 Tallenna resepti</button>
+                </div>
+            </form>
         </div>
     </div>
+</div>
 
-    <button type="button" onclick="addIngredient()">Lisää ainesosa</button>
-
-    <p><button type="submit">Tallenna resepti</button></p>
-</form>
-
-<a href="/">Takaisin listaan</a>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
