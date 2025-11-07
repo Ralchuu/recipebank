@@ -9,23 +9,7 @@
 
 <body class="bg-light">
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-    <div class="container">
-        <a class="navbar-brand" href="/">Reseptipankki</a>
-        
-        <div class="d-flex align-items-center">
-            <div sec:authorize="isAuthenticated()">
-                <span class="text-white me-3">Kirjautunut: <span sec:authentication="name"></span></span>
-                <form th:action="@{/logout}" method="post" class="d-inline">
-                    <button class="btn btn-outline-light btn-sm">Kirjaudu ulos</button>
-                </form>
-            </div>
-            <div sec:authorize="!isAuthenticated()">
-                <a th:href="@{/login}" class="btn btn-outline-light btn-sm">Kirjaudu sisään</a>
-            </div>
-        </div>
-    </div>
-</nav>
+<div th:replace="~{fragments/navbar :: navbar}"></div>
 
 <div class="container">
 
@@ -51,6 +35,48 @@
 
             <h4>Ohje</h4>
             <p th:text="${recipe.instruction}"></p>
+
+            <h4 class="mt-4">Arvostelut</h4>
+            
+            <!-- Flash messages -->
+            <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Sulje"></button>
+            </div>
+
+            <!-- Reviews -->
+            <div th:if="${recipe.reviews != null and !recipe.reviews.isEmpty()}">
+                <div class="list-group mb-3">
+                    <div th:each="review : ${recipe.reviews}" class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <strong th:text="${review.user.username}"></strong>
+                                <span class="text-warning">
+                                    <span th:each="i : ${#numbers.sequence(1, review.rating)}">⭐</span>
+                                </span>
+                            </div>
+                            <small class="text-muted" sec:authorize="hasRole('ADMIN')">
+                                <a th:href="@{/reviews/delete/{id}(id=${review.reviewId})}" 
+                                   class="btn btn-outline-danger btn-sm">
+                                    Poista
+                                </a>
+                            </small>
+                        </div>
+                        <p class="mb-0 mt-2" th:text="${review.comment}"></p>
+                    </div>
+                </div>
+            </div>
+            <div th:if="${recipe.reviews == null or recipe.reviews.isEmpty()}" class="alert alert-light">
+                Ei vielä arvosteluja.
+            </div>
+
+            <!-- Add review button -->
+            <div sec:authorize="isAuthenticated()" class="mb-4">
+                <a class="btn btn-primary" th:href="@{/reviews/add/{id}(id=${recipe.recipeId})}">
+                    + Lisää arvostelu
+                </a>
+            </div>
 
             <div class="d-flex gap-2">
                 <a href="/" class="btn btn-secondary">← Takaisin listaan</a>

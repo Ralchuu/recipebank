@@ -1,6 +1,7 @@
 package hh.recipebank.recipebank.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 public class Review {
@@ -10,6 +11,9 @@ public class Review {
     private Long reviewId;
 
     private String comment;
+
+    @Min(value = 1, message = "Arvosanan on oltava vähintään 1")
+    @Max(value = 5, message = "Arvosanan on oltava enintään 5")
     private int rating; // esim. 1–5
 
     @ManyToOne

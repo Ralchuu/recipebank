@@ -1,6 +1,7 @@
 package hh.recipebank.recipebank.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 
 @Entity
 public class Ingredient {
@@ -9,6 +10,7 @@ public class Ingredient {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ingredientId;
 
+    @NotBlank(message = "Ainesosan nimi on pakollinen")
     private String name;
     private String amount;
     private String unit;

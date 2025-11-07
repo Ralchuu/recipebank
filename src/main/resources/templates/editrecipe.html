@@ -16,13 +16,13 @@
             div.classList.add('row', 'g-2', 'align-items-center', 'mb-2');
             div.innerHTML = `
                 <div class="col-md-4">
-                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].name" placeholder="Nimi" value="${name}" required>
+                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].name" placeholder="Nimi" value="${name}">
                 </div>
                 <div class="col-md-3">
-                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].amount" placeholder="Määrä" value="${amount}" required>
+                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].amount" placeholder="Määrä" value="${amount}">
                 </div>
                 <div class="col-md-3">
-                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].unit" placeholder="Yksikkö" value="${unit}" required>
+                    <input type="text" class="form-control" name="ingredients[${ingredientIndex}].unit" placeholder="Yksikkö" value="${unit}">
                 </div>
                 <div class="col-md-2 text-end">
                     <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.row').remove()">Poista</button>
@@ -51,19 +51,30 @@
             <form th:action="@{/addrecipe}" th:object="${recipe}" method="post">
                 <input type="hidden" th:field="*{recipeId}"/>
 
+                <!-- Global validation errors -->
+                <div th:if="${#fields.hasErrors()}" class="alert alert-danger">
+                    <strong>Korjaa lomakkeen virheet:</strong>
+                    <ul>
+                        <li th:each="err : ${#fields.errors('*')}" th:text="${err}"></li>
+                    </ul>
+                </div>
+
                 <div class="mb-3">
                     <label class="form-label">Otsikko</label>
-                    <input type="text" class="form-control" th:field="*{title}" required>
+                    <input type="text" class="form-control" th:field="*{title}">
+                    <div class="form-text text-danger" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Kuvaus</label>
-                    <input type="text" class="form-control" th:field="*{description}" required>
+                    <input type="text" class="form-control" th:field="*{description}">
+                    <div class="form-text text-danger" th:if="${#fields.hasErrors('description')}" th:errors="*{description}"></div>
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Ohje</label>
-                    <textarea class="form-control" th:field="*{instruction}" rows="4" required></textarea>
+                    <textarea class="form-control" th:field="*{instruction}" rows="8"></textarea>
+                    <div class="form-text text-danger" th:if="${#fields.hasErrors('instruction')}" th:errors="*{instruction}"></div>
                 </div>
 
                 <h4 class="mb-3">Ainesosat</h4>
@@ -71,13 +82,13 @@
                     <div class="row g-2 align-items-center mb-2" th:each="ing, stat : *{ingredients}">
                         <input type="hidden" th:field="*{ingredients[__${stat.index}__].ingredientId}" />
                         <div class="col-md-4">
-                            <input type="text" class="form-control" th:field="*{ingredients[__${stat.index}__].name}" placeholder="Nimi" required>
+                            <input type="text" class="form-control" th:field="*{ingredients[__${stat.index}__].name}" placeholder="Nimi">
                         </div>
                         <div class="col-md-3">
-                            <input type="text" class="form-control" th:field="*{ingredients[__${stat.index}__].amount}" placeholder="Määrä" required>
+                            <input type="text" class="form-control" th:field="*{ingredients[__${stat.index}__].amount}" placeholder="Määrä">
                         </div>
                         <div class="col-md-3">
-                            <input type="text" class="form-control" th:field="*{ingredients[__${stat.index}__].unit}" placeholder="Yksikkö" required>
+                            <input type="text" class="form-control" th:field="*{ingredients[__${stat.index}__].unit}" placeholder="Yksikkö">
                         </div>
                         <div class="col-md-2 text-end">
                             <button type="button" class="btn btn-outline-danger btn-sm" onclick="this.closest('.row').remove()">Poista</button>

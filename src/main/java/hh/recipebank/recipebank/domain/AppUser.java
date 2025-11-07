@@ -1,6 +1,7 @@
 package hh.recipebank.recipebank.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 import java.util.List;
 
 @Entity
@@ -10,9 +11,18 @@ public class AppUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
+    @NotBlank(message = "Käyttäjätunnus on pakollinen")
+    @Size(max = 20, message = "Käyttäjätunnus saa olla enintään 20 merkkiä")
     private String username;
+
+    @NotBlank(message = "Salasana on pakollinen")
+    @Size(min = 5, message = "Salasanan on oltava vähintään 5 merkkiä")
     private String password;
+
+    @NotBlank(message = "Sähköposti on pakollinen")
+    @Email(message = "Anna kelvollinen sähköpostiosoite")
     private String email;
+
     private String role; // "ROLE_USER" tai "ROLE_ADMIN"
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)

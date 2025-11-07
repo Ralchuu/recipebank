@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
@@ -36,12 +38,27 @@ public class AppUserController {
 
     // Tallenna käyttäjä
     @PostMapping("/save")
-    public String saveUser(@ModelAttribute("user") AppUser user) {
+    public String saveUser(@Valid @ModelAttribute("user") AppUser user, BindingResult bindingResult, Model model) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
+
+        // Server-side validation failures
+        if (bindingResult.hasErrors()) {
+            return "adduser";
+        }
+
+        // Uniikin käyttäjänimen tarkistus
+        if (user.getUsername() != null && appUserRepository.existsByUsername(user.getUsername())) {
+            bindingResult.rejectValue("username", "user.username.exists", "Käyttäjänimi on jo käytössä");
+            return "adduser";
+        }
+
         // Hashataan salasana ennen tallennusta
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getRole() == null) {
+            user.setRole("ROLE_USER");
+        }
         appUserRepository.save(user);
         return "redirect:/users";
     }

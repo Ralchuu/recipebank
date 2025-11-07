@@ -5,6 +5,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.validation.BindingResult;
+import jakarta.validation.Valid;
 import hh.recipebank.recipebank.domain.*;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
@@ -36,9 +38,20 @@ public class RecipeController {
     // Tallenna resepti
     @PostMapping("/addrecipe")
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public String saveRecipe(@ModelAttribute("recipe") Recipe recipe) {
+    public String saveRecipe(@Valid @ModelAttribute("recipe") Recipe recipe, BindingResult bindingResult, Model model) {
         if (recipe == null) {
             throw new IllegalArgumentException("Recipe cannot be null");
+        }
+
+        // Server-side validation
+        if (bindingResult.hasErrors()) {
+            // If editing an existing recipe, return edit view, otherwise add view
+            if (recipe.getRecipeId() != null) {
+                model.addAttribute("recipe", recipe);
+                return "editrecipe";
+            }
+            model.addAttribute("recipe", recipe);
+            return "addrecipe";
         }
 
         if (recipe.getIngredients() != null) {

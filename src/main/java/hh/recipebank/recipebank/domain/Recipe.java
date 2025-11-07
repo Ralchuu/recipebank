@@ -3,6 +3,8 @@ package hh.recipebank.recipebank.domain;
 import java.time.LocalDateTime;
 import java.util.List;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 
 @Entity
 public class Recipe {
@@ -11,13 +13,25 @@ public class Recipe {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long recipeId;
 
+    @NotBlank(message = "Otsikko on pakollinen")
+    @Size(max = 150, message = "Otsikon pituus saa olla enintään 150 merkkiä")
     private String title;
+
+    @NotBlank(message = "Kuvaus on pakollinen")
+    @Size(max = 150, message = "Kuvauksen pituus saa olla enintään 150 merkkiä")
     private String description;
+
+    @NotBlank(message = "Ohje on pakollinen")
     private String instruction;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
+    @Valid
     @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-private List<Ingredient> ingredients;
+    private List<Ingredient> ingredients;
+
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    private List<Review> reviews;
 
 
     public Recipe() {}
@@ -50,6 +64,14 @@ private List<Ingredient> ingredients;
         this.ingredients = ingredients;
         if (ingredients != null) {
             ingredients.forEach(i -> i.setRecipe(this));
+        }
+    }
+
+    public List<Review> getReviews() { return reviews; }
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+        if (reviews != null) {
+            reviews.forEach(r -> r.setRecipe(this));
         }
     }
 }

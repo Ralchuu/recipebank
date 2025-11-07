@@ -29,6 +29,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 .requestMatchers("/addrecipe").hasAnyRole("ADMIN","USER")
                 .requestMatchers("/editrecipe/**", "/deleterecipe/**").hasRole("ADMIN")
+                .requestMatchers("/reviews/delete/**").hasRole("ADMIN")
                 .requestMatchers("/users/**").hasRole("ADMIN")
                 .anyRequest().permitAll()
         )
@@ -40,7 +41,8 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
                 .permitAll()
-        );
+        )
+        .csrf(csrf -> csrf.disable());
 
     return http.build();
     }

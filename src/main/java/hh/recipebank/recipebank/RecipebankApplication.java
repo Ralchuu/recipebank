@@ -1,11 +1,7 @@
 package hh.recipebank.recipebank;
 
-import hh.recipebank.recipebank.domain.AppUser;
-import hh.recipebank.recipebank.domain.AppUserRepository;
-import hh.recipebank.recipebank.domain.Ingredient;
-import hh.recipebank.recipebank.domain.IngredientRepository;
-import hh.recipebank.recipebank.domain.Recipe;
-import hh.recipebank.recipebank.domain.RecipeRepository;
+import hh.recipebank.recipebank.domain.*;
+import java.util.Random;
 
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -23,6 +19,7 @@ public class RecipebankApplication {
     @Bean
 public CommandLineRunner loadTestData(
         AppUserRepository userRepository,
+        ReviewRepository reviewRepository,
         PasswordEncoder passwordEncoder,
         RecipeRepository recipeRepository,
         IngredientRepository ingredientRepository
@@ -112,8 +109,87 @@ public CommandLineRunner loadTestData(
             ingredientRepository.save(new Ingredient("Soijakastike", "3", "rkl", r5));
             ingredientRepository.save(new Ingredient("Nuudelit", "200", "g", r5));
 
-        }
+            // Lisätään arvostelut vain jos niitä ei vielä ole
+            if (reviewRepository.count() == 0) {
+                AppUser user = userRepository.findByUsername("user").get();
+                AppUser admin = userRepository.findByUsername("admin").get();
+
+            // Resepti 1: Makaronilaatikko
+            Review r1review1 = new Review();
+            r1review1.setRating(4);
+            r1review1.setComment("Perinteinen ja hyvä!");
+            r1review1.setUser(user);
+            r1review1.setRecipe(r1);
+            reviewRepository.save(r1review1);
+
+            Review r1review2 = new Review();
+            r1review2.setRating(5);
+            r1review2.setComment("Loistava perusruoka");
+            r1review2.setUser(admin);
+            r1review2.setRecipe(r1);
+            reviewRepository.save(r1review2);
+
+            // Resepti 2: Pannukakku
+            Review r2review1 = new Review();
+            r2review1.setRating(5);
+            r2review1.setComment("Helppo ja maukas jälkiruoka");
+            r2review1.setUser(user);
+            r2review1.setRecipe(r2);
+            reviewRepository.save(r2review1);
+
+            Review r2review2 = new Review();
+            r2review2.setRating(4);
+            r2review2.setComment("Toimiva perusresepti");
+            r2review2.setUser(admin);
+            r2review2.setRecipe(r2);
+            reviewRepository.save(r2review2);
+
+            // Resepti 3: Lohikeitto
+            Review r3review1 = new Review();
+            r3review1.setRating(5);
+            r3review1.setComment("Todella maukasta!");
+            r3review1.setUser(user);
+            r3review1.setRecipe(r3);
+            reviewRepository.save(r3review1);
+
+            Review r3review2 = new Review();
+            r3review2.setRating(5);
+            r3review2.setComment("Täydellinen talviruoka");
+            r3review2.setUser(admin);
+            r3review2.setRecipe(r3);
+            reviewRepository.save(r3review2);
+
+            // Resepti 4: Kanakastike ja riisi
+            Review r4review1 = new Review();
+            r4review1.setRating(3);
+            r4review1.setComment("Ihan ok perusruoka");
+            r4review1.setUser(user);
+            r4review1.setRecipe(r4);
+            reviewRepository.save(r4review1);
+
+            Review r4review2 = new Review();
+            r4review2.setRating(4);
+            r4review2.setComment("Nopea tehdä ja maistuu");
+            r4review2.setUser(admin);
+            r4review2.setRecipe(r4);
+            reviewRepository.save(r4review2);
+
+            // Resepti 5: Kasviswokki
+            Review r5review1 = new Review();
+            r5review1.setRating(4);
+            r5review1.setComment("Raikas ja terveellinen!");
+            r5review1.setUser(user);
+            r5review1.setRecipe(r5);
+            reviewRepository.save(r5review1);
+
+            Review r5review2 = new Review();
+            r5review2.setRating(3);
+            r5review2.setComment("Hyvä kasvisvaihtoehto");
+            r5review2.setUser(admin);
+            r5review2.setRecipe(r5);
+            reviewRepository.save(r5review2);
+            } // suljetaan if(reviewRepository.count() == 0)
+        } // suljetaan if(recipeRepository.count() == 0)
     };
 }
-
 }
