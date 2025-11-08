@@ -27,10 +27,10 @@ public class Recipe {
     private LocalDateTime createdAt = LocalDateTime.now();
 
     @Valid
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = {CascadeType.PERSIST, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private List<Ingredient> ingredients;
 
-    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "recipe", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Review> reviews;
 
 
@@ -69,9 +69,12 @@ public class Recipe {
 
     public List<Review> getReviews() { return reviews; }
     public void setReviews(List<Review> reviews) {
-        this.reviews = reviews;
-        if (reviews != null) {
-            reviews.forEach(r -> r.setRecipe(this));
+        // If the incoming value is null (common when the edit form doesn't include reviews),
+        // do not overwrite the existing reviews list — preserves existing review entities.
+        if (reviews == null) {
+            return;
         }
+        this.reviews = reviews;
+        reviews.forEach(r -> r.setRecipe(this));
     }
 }
