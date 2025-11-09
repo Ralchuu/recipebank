@@ -14,8 +14,8 @@ FROM eclipse-temurin:21-jre
 # Copy the built jar from build stage
 COPY --from=build /home/app/target/recipebank-0.0.1-SNAPSHOT.jar /usr/local/lib/recipebank.jar
 
-# Change EXPOSE to match your app's port
-EXPOSE 8081
+# Change from 8081 to 8080
+EXPOSE 8080
 
-# Start the application with explicit host binding
+# Start the application
 ENTRYPOINT ["java", "-Dserver.address=0.0.0.0", "-jar", "/usr/local/lib/recipebank.jar"]
