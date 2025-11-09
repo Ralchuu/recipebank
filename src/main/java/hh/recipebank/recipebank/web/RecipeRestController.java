@@ -2,76 +2,102 @@ package hh.recipebank.recipebank.web;
 
 import hh.recipebank.recipebank.domain.Recipe;
 import hh.recipebank.recipebank.domain.RecipeRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import hh.recipebank.recipebank.domain.Ingredient;
+import hh.recipebank.recipebank.domain.Review;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.Valid;
 
+import java.net.URI;
 import java.util.List;
-import java.util.NoSuchElementException;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/api/recipes")
+@SuppressWarnings("null")
 public class RecipeRestController {
 
-    @Autowired
-    private RecipeRepository recipeRepository;
+	private final RecipeRepository recipeRepository;
 
-    // Palauta kaikki reseptit
-    @GetMapping
-    public List<Recipe> getAllRecipes() {
-        return recipeRepository.findAll();
-    }
+	public RecipeRestController(RecipeRepository recipeRepository) {
+		this.recipeRepository = recipeRepository;
+	}
 
-    // Palauta yksittäinen resepti ID:n perusteella
-    @GetMapping("/{id}")
-    public Recipe getRecipeById(@PathVariable("id") Long id) {
-        if (id == null || !recipeRepository.existsById(id)) {
-            throw new NoSuchElementException("Invalid recipe ID: " + id);
-        }
-        return recipeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
-    }
+	// Palauta kaikki reseptit
+	@GetMapping
+	public ResponseEntity<List<Recipe>> getAllRecipes() {
+		return ResponseEntity.ok(recipeRepository.findAll());
+	}
 
-    // Lisää uusi resepti
-    @PostMapping
-    public Recipe createRecipe(@RequestBody Recipe recipe) {
-        if (recipe == null) {
-            throw new IllegalArgumentException("Recipe cannot be null");
-        }
-        if (recipe.getIngredients() != null) {
-            recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
-        }
-        return recipeRepository.save(recipe);
-    }
+	// Palauta yksittäinen resepti ID:n perusteella
+	@GetMapping("/{id}")
+	public ResponseEntity<Recipe> getRecipeById(@PathVariable long id) {
+		return recipeRepository.findById(id)
+			.map(ResponseEntity::ok)
+			.orElse(ResponseEntity.notFound().build());
+	}
 
-    // Päivitä olemassa oleva resepti
-    @PutMapping("/{id}")
-    public Recipe updateRecipe(@PathVariable("id") Long id, @RequestBody Recipe updatedRecipe) {
-        if (id == null || !recipeRepository.existsById(id)) {
-            throw new NoSuchElementException("Invalid recipe ID: " + id);
-        }
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
+	// Palauta reseptin ainesosat
+	@GetMapping("/{id}/ingredients")
+	public ResponseEntity<List<Ingredient>> getRecipeIngredients(@PathVariable long id) {
+		return recipeRepository.findById(id)
+			.map(r -> ResponseEntity.ok(r.getIngredients()))
+			.orElse(ResponseEntity.notFound().build());
+	}
 
-        recipe.setTitle(updatedRecipe.getTitle());
-        recipe.setDescription(updatedRecipe.getDescription());
-        recipe.setInstruction(updatedRecipe.getInstruction());
+	// Palauta reseptin arvostelut
+	@GetMapping("/{id}/reviews")
+	public ResponseEntity<List<Review>> getRecipeReviews(@PathVariable long id) {
+		return recipeRepository.findById(id)
+			.map(r -> ResponseEntity.ok(r.getReviews()))
+			.orElse(ResponseEntity.notFound().build());
+	}
 
-        if (updatedRecipe.getIngredients() != null) {
-            // Poistetaan vanhat ainesosat ja korvataan uusilla
-            recipe.getIngredients().clear();
-            updatedRecipe.getIngredients().forEach(i -> i.setRecipe(recipe));
-            recipe.getIngredients().addAll(updatedRecipe.getIngredients());
-        }
+	// Lisää uusi resepti
+	@PostMapping
+	public ResponseEntity<Recipe> createRecipe(@Valid @RequestBody Recipe recipe) {
+		if (recipe == null) {
+			return ResponseEntity.badRequest().build();
+		}
+		// Alustaa ainesosaluettelon, jos se on tyhj
+		if (recipe.getIngredients() != null) {
+			recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
+		}
+		Recipe saved = recipeRepository.save(recipe);
+		return ResponseEntity.created(URI.create("/api/recipes/" + saved.getRecipeId())).body(saved);
+	}
 
-        return recipeRepository.save(recipe);
-    }
+	// Päivitä olemassa oleva resepti
+	@PutMapping("/{id}")
+	public ResponseEntity<Recipe> updateRecipe(@PathVariable long id, @Valid @RequestBody Recipe updated) {
+		return recipeRepository.findById(id).map(existing -> {
+			existing.setTitle(updated.getTitle());
+			existing.setDescription(updated.getDescription());
+			existing.setInstruction(updated.getInstruction());
 
-    // Poista resepti
-    @DeleteMapping("/{id}")
-    public void deleteRecipe(@PathVariable("id") Long id) {
-        if (id == null || !recipeRepository.existsById(id)) {
-            throw new NoSuchElementException("Invalid recipe ID: " + id);
-        }
-        recipeRepository.deleteById(id);
-    }
+			// Korvataan ainesosat, jos ne on annettu
+			if (updated.getIngredients() != null) {
+				existing.getIngredients().clear();
+				updated.getIngredients().forEach(i -> i.setRecipe(existing));
+				existing.getIngredients().addAll(updated.getIngredients());
+			}
+			Recipe saved = recipeRepository.save(existing);
+			return ResponseEntity.ok(saved);
+		}).orElse(ResponseEntity.notFound().build());
+	}
+
+	// Poista resepti
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Void> deleteRecipe(@PathVariable long id) {
+		if (!recipeRepository.existsById(id)) {
+			return ResponseEntity.notFound().build();
+		}
+		recipeRepository.deleteById(id);
+		return ResponseEntity.noContent().build();
+	}
+
+	// Valinnainen yksinkertainen ping-testi (poista kommentointi tarvittaessa)
+	// @GetMapping("/ping")
+	// public String ping() { return "recipes-api-ok"; }
 }
