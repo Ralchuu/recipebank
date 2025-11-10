@@ -19,31 +19,30 @@ import hh.recipebank.recipebank.domain.AppUserRepository;
 @SuppressWarnings("null")
 public class AppUserRestController {
 
+	// Fields
 	private final AppUserRepository appUserRepository;
 
+	// Constructors
 	public AppUserRestController(AppUserRepository appUserRepository) {
 		this.appUserRepository = appUserRepository;
 	}
 
-	// list all users
+	// Endpoints
 	@GetMapping("/api/users")
 	public List<AppUser> getAllUsers() {
 		return appUserRepository.findAll();
 	}
 
-	// get user by id
 	@GetMapping("/api/users/{id}")
 	public Optional<AppUser> getUser(@PathVariable long id) {
 		return appUserRepository.findById(id);
 	}
 
-	// create user (expects username, password-hash, role, email if present)
 	@PostMapping("/api/users")
 	public AppUser createUser(@RequestBody AppUser user) {
 		return appUserRepository.save(user);
 	}
 
-	// delete user by id
 	@DeleteMapping("/api/users/{id}")
 	public void deleteUser(@PathVariable long id) {
 		appUserRepository.deleteById(id);

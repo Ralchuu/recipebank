@@ -108,12 +108,12 @@ public CommandLineRunner loadTestData(
             ingredientRepository.save(new Ingredient("Soijakastike", "3", "rkl", r5));
             ingredientRepository.save(new Ingredient("Nuudelit", "200", "g", r5));
 
-            // Lisätään arvostelut vain jos niitä ei vielä ole
+            // Add reviews only if none exist
             if (reviewRepository.count() == 0) {
                 AppUser user = userRepository.findByUsername("user").get();
                 AppUser admin = userRepository.findByUsername("admin").get();
 
-            // Resepti 1: Makaronilaatikko
+            // Recipe 1: Makaronilaatikko
             Review r1review1 = new Review();
             r1review1.setRating(4);
             r1review1.setComment("Perinteinen ja hyvä!");
@@ -128,7 +128,7 @@ public CommandLineRunner loadTestData(
             r1review2.setRecipe(r1);
             reviewRepository.save(r1review2);
 
-            // Resepti 2: Pannukakku
+            // Recipe 2: Pannukakku
             Review r2review1 = new Review();
             r2review1.setRating(5);
             r2review1.setComment("Helppo ja maukas jälkiruoka");
@@ -143,7 +143,7 @@ public CommandLineRunner loadTestData(
             r2review2.setRecipe(r2);
             reviewRepository.save(r2review2);
 
-            // Resepti 3: Lohikeitto
+            // Recipe 3: Lohikeitto
             Review r3review1 = new Review();
             r3review1.setRating(5);
             r3review1.setComment("Todella maukasta!");
@@ -158,7 +158,7 @@ public CommandLineRunner loadTestData(
             r3review2.setRecipe(r3);
             reviewRepository.save(r3review2);
 
-            // Resepti 4: Kanakastike ja riisi
+            // Recipe 4: Kanakastike ja riisi
             Review r4review1 = new Review();
             r4review1.setRating(3);
             r4review1.setComment("Ihan ok perusruoka");
@@ -173,7 +173,7 @@ public CommandLineRunner loadTestData(
             r4review2.setRecipe(r4);
             reviewRepository.save(r4review2);
 
-            // Resepti 5: Kasviswokki
+            // Recipe 5: Kasviswokki
             Review r5review1 = new Review();
             r5review1.setRating(4);
             r5review1.setComment("Raikas ja terveellinen!");
@@ -187,8 +187,8 @@ public CommandLineRunner loadTestData(
             r5review2.setUser(admin);
             r5review2.setRecipe(r5);
             reviewRepository.save(r5review2);
-            } // suljetaan if(reviewRepository.count() == 0)
-        } // suljetaan if(recipeRepository.count() == 0)
+            } 
+        } 
     };
 }
 }

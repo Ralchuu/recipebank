@@ -22,7 +22,7 @@ public class IngredientRepositoryTest {
 	@Autowired
 	private RecipeRepository recipeRepository;
 
-	// Create ingredient linked to a recipe and verify persistence (no lambdas, no try/catch)
+	// Create ingredient linked to a recipe
 	@Test
 	public void createIngredientLinkedToRecipe() {
 		Recipe r = new Recipe("ParentRecipe", "Desc", "Inst", null);

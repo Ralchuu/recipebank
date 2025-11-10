@@ -22,7 +22,7 @@ public class ReviewRepositoryTest {
 	@Autowired
 	private RecipeRepository recipeRepository;
 
-	// Create a review linked to a recipe and verify it is persisted (no lambdas)
+	// Create review linked to a recipe
 	@Test
 	public void createReviewLinkedToRecipe() {
 		Recipe r = new Recipe("ReviewParent", "Desc", "Inst", null);

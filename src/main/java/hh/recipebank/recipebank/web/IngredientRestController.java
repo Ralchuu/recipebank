@@ -21,31 +21,30 @@ import hh.recipebank.recipebank.domain.RecipeRepository;
 @SuppressWarnings("null")
 public class IngredientRestController {
 
+	// Fields
 	private final IngredientRepository ingredientRepository;
 	private final RecipeRepository recipeRepository;
 
+	// Constructors
 	public IngredientRestController(IngredientRepository ingredientRepository,
 		RecipeRepository recipeRepository) {
 		this.ingredientRepository = ingredientRepository;
 		this.recipeRepository = recipeRepository;
 	}
 
-	// list all ingredients
+	// Endpoints
 	@GetMapping("/api/ingredients")
 	public List<Ingredient> getAllIngredients() {
 		return ingredientRepository.findAll();
 	}
 
-	// get ingredient by id
 	@GetMapping("/api/ingredients/{id}")
 	public Optional<Ingredient> getIngredient(@PathVariable long id) {
 		return ingredientRepository.findById(id);
 	}
 
-	// create ingredient (optionally with recipeId)
 	@PostMapping("/api/ingredients")
 	public Ingredient createIngredient(@RequestBody Ingredient ingredient) {
-		// if JSON contains recipeId: { "name":"X","amount":"1","unit":"pcs","recipe":{"recipeId":5}}
 		Recipe r = ingredient.getRecipe();
 		if (r != null && r.getRecipeId() != null) {
 			recipeRepository.findById(r.getRecipeId()).ifPresent(ingredient::setRecipe);
@@ -53,7 +52,6 @@ public class IngredientRestController {
 		return ingredientRepository.save(ingredient);
 	}
 
-	// delete ingredient
 	@DeleteMapping("/api/ingredients/{id}")
 	public void deleteIngredient(@PathVariable long id) {
 		ingredientRepository.deleteById(id);

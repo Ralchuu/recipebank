@@ -17,7 +17,7 @@ public class AppUserRepositoryTest {
 	@Autowired
 	private AppUserRepository repository;
 
-	// Create new user and verify repository contains it (no try/catch, no lambdas)
+	// Create user and verify it is stored
 	@Test
 	public void createNewUser() {
 		AppUser user = new AppUser();
@@ -39,7 +39,7 @@ public class AppUserRepositoryTest {
 		assertThat(found).isTrue();
 	}
 
-	// Save then delete user and verify removal (no try/catch, no lambdas)
+	// Delete user and confirm absence
 	@Test
 	public void deleteUserShouldRemoveIt() {
 		AppUser user = new AppUser();
@@ -63,7 +63,7 @@ public class AppUserRepositoryTest {
 		assertThat(exists).isFalse();
 	}
 
-	// Find by username via simple iteration (no repository-specific methods required)
+	// Find user by username (manual scan)
 	@Test
 	public void findByUsernameShouldReturnUser() {
 		AppUser user = new AppUser();
@@ -84,7 +84,6 @@ public class AppUserRepositoryTest {
 		}
 
 		assertThat(found).isNotNull();
-		// Explicit null-check to satisfy analyzer
 		if (found != null) {
 			assertThat(found.getUsername()).isEqualTo("findme");
 		}

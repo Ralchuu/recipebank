@@ -18,19 +18,21 @@ import java.util.List;
 @SuppressWarnings("null")
 public class RecipeRestController {
 
+	// Fields
 	private final RecipeRepository recipeRepository;
 
+	// Constructors
 	public RecipeRestController(RecipeRepository recipeRepository) {
 		this.recipeRepository = recipeRepository;
 	}
 
-	// Palauta kaikki reseptit
+	// Endpoints
+
 	@GetMapping
 	public ResponseEntity<List<Recipe>> getAllRecipes() {
 		return ResponseEntity.ok(recipeRepository.findAll());
 	}
 
-	// Palauta yksittäinen resepti ID:n perusteella
 	@GetMapping("/{id}")
 	public ResponseEntity<Recipe> getRecipeById(@PathVariable long id) {
 		return recipeRepository.findById(id)
@@ -38,7 +40,6 @@ public class RecipeRestController {
 			.orElse(ResponseEntity.notFound().build());
 	}
 
-	// Palauta reseptin ainesosat
 	@GetMapping("/{id}/ingredients")
 	public ResponseEntity<List<Ingredient>> getRecipeIngredients(@PathVariable long id) {
 		return recipeRepository.findById(id)
@@ -46,7 +47,6 @@ public class RecipeRestController {
 			.orElse(ResponseEntity.notFound().build());
 	}
 
-	// Palauta reseptin arvostelut
 	@GetMapping("/{id}/reviews")
 	public ResponseEntity<List<Review>> getRecipeReviews(@PathVariable long id) {
 		return recipeRepository.findById(id)
@@ -54,13 +54,12 @@ public class RecipeRestController {
 			.orElse(ResponseEntity.notFound().build());
 	}
 
-	// Lisää uusi resepti
 	@PostMapping
 	public ResponseEntity<Recipe> createRecipe(@Valid @RequestBody Recipe recipe) {
 		if (recipe == null) {
 			return ResponseEntity.badRequest().build();
 		}
-		// Alustaa ainesosaluettelon, jos se on tyhj
+		// Set back-reference on each ingredient to this recipe (if provided)
 		if (recipe.getIngredients() != null) {
 			recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
 		}
@@ -68,7 +67,6 @@ public class RecipeRestController {
 		return ResponseEntity.created(URI.create("/api/recipes/" + saved.getRecipeId())).body(saved);
 	}
 
-	// Päivitä olemassa oleva resepti
 	@PutMapping("/{id}")
 	public ResponseEntity<Recipe> updateRecipe(@PathVariable long id, @Valid @RequestBody Recipe updated) {
 		return recipeRepository.findById(id).map(existing -> {
@@ -76,7 +74,7 @@ public class RecipeRestController {
 			existing.setDescription(updated.getDescription());
 			existing.setInstruction(updated.getInstruction());
 
-			// Korvataan ainesosat, jos ne on annettu
+			// Replace ingredients if provided: clear old ones, link and add new
 			if (updated.getIngredients() != null) {
 				existing.getIngredients().clear();
 				updated.getIngredients().forEach(i -> i.setRecipe(existing));
@@ -87,7 +85,7 @@ public class RecipeRestController {
 		}).orElse(ResponseEntity.notFound().build());
 	}
 
-	// Poista resepti
+
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Void> deleteRecipe(@PathVariable long id) {
 		if (!recipeRepository.existsById(id)) {
@@ -96,8 +94,4 @@ public class RecipeRestController {
 		recipeRepository.deleteById(id);
 		return ResponseEntity.noContent().build();
 	}
-
-	// Valinnainen yksinkertainen ping-testi (poista kommentointi tarvittaessa)
-	// @GetMapping("/ping")
-	// public String ping() { return "recipes-api-ok"; }
 }

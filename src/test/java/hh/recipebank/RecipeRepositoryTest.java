@@ -17,7 +17,7 @@ public class RecipeRepositoryTest {
 	@Autowired
 	private RecipeRepository repository;
 
-	// Create recipe and assert it's persisted (no lambdas)
+	// Create recipe and verify persistence
 	@Test
 	public void createNewRecipe() {
 		Recipe r = new Recipe("Test Book", "Desc", "Do this", null);
@@ -34,7 +34,7 @@ public class RecipeRepositoryTest {
 		assertThat(exists).isTrue();
 	}
 
-	// Save and delete recipe using repository.delete(object)
+	// Delete recipe and verify removal
 	@Test
 	public void deleteRecipeShouldRemoveIt() {
 		Recipe r = new Recipe("To Delete", "Desc", "Inst", null);
@@ -53,7 +53,7 @@ public class RecipeRepositoryTest {
 		assertThat(exists).isFalse();
 	}
 
-	// Find by title via iteration rather than lambdas
+	// Find recipe by title
 	@Test
 	public void findByIdShouldReturnRecipe() {
 		Recipe r = new Recipe("Unique Title", "Desc", "Inst", null);
@@ -68,7 +68,6 @@ public class RecipeRepositoryTest {
 			}
 		}
 		assertThat(found).isNotNull();
-		// Explicit null-check to satisfy analyzer
 		if (found != null) {
 			assertThat(found.getTitle()).isEqualTo("Unique Title");
 		}

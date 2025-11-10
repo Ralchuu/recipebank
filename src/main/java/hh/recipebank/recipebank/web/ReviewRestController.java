@@ -21,12 +21,15 @@ import hh.recipebank.recipebank.domain.AppUserRepository;
 @CrossOrigin
 @RestController
 @SuppressWarnings("null")
+
 public class ReviewRestController {
 
+	// Fields
 	private final ReviewRepository reviewRepository;
 	private final RecipeRepository recipeRepository;
 	private final AppUserRepository appUserRepository;
 
+	// Constructors
 	public ReviewRestController(ReviewRepository reviewRepository,
 		RecipeRepository recipeRepository,
 		AppUserRepository appUserRepository) {
@@ -35,19 +38,17 @@ public class ReviewRestController {
 		this.appUserRepository = appUserRepository;
 	}
 
-	// list all reviews
+	// Endpoints
 	@GetMapping("/api/reviews")
 	public List<Review> getAllReviews() {
 		return reviewRepository.findAll();
 	}
 
-	// get review by id
 	@GetMapping("/api/reviews/{id}")
 	public Optional<Review> getReview(@PathVariable long id) {
 		return reviewRepository.findById(id);
 	}
 
-	// create review (expects rating, comment, recipe.recipeId, optional user.userId)
 	@PostMapping("/api/reviews")
 	public Review createReview(@RequestBody Review review) {
 		Recipe r = review.getRecipe();
@@ -61,7 +62,6 @@ public class ReviewRestController {
 		return reviewRepository.save(review);
 	}
 
-	// delete review
 	@DeleteMapping("/api/reviews/{id}")
 	public void deleteReview(@PathVariable long id) {
 		reviewRepository.deleteById(id);

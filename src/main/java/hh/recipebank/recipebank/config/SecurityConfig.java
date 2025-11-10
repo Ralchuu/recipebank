@@ -12,41 +12,35 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    // No explicit userDetailsService injected here. Use default configuration or add it later if needed.
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-        .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/").permitAll()
-                .requestMatchers("/recipelist").permitAll()
-                .requestMatchers("/recipe/*").permitAll()
-                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
-                .requestMatchers("/addrecipe").hasAnyRole("ADMIN","USER")
-                .requestMatchers("/editrecipe/**", "/deleterecipe/**").hasRole("ADMIN")
-                .requestMatchers("/reviews/delete/**").hasRole("ADMIN")
-                .requestMatchers("/users/**").hasRole("ADMIN")
-                .requestMatchers("/h2-console/**").permitAll()
-                .anyRequest().permitAll()
-        )
-        .formLogin(form -> form
-                .defaultSuccessUrl("/", true)
-                .permitAll()
-        )
-        .logout(logout -> logout
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .permitAll()
-        )
-        .csrf(csrf -> csrf.disable());
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/recipelist").permitAll()
+                        .requestMatchers("/recipe/*").permitAll()
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/addrecipe").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers("/editrecipe/**", "/deleterecipe/**").hasRole("ADMIN")
+                        .requestMatchers("/reviews/delete/**").hasRole("ADMIN")
+                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers("/h2-console/**").permitAll()
+                        .anyRequest().permitAll())
+                .formLogin(form -> form
+                        .defaultSuccessUrl("/", true)
+                        .permitAll())
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/")
+                        .permitAll())
+                .csrf(csrf -> csrf.disable());
         http.headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
-
-    return http.build();
+        return http.build();
     }
 }

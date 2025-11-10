@@ -14,95 +14,98 @@ import java.util.NoSuchElementException;
 @Controller
 public class RecipeController {
 
-    @Autowired
-    private RecipeRepository recipeRepository;
+	// Fields
+	@Autowired
+	private RecipeRepository recipeRepository;
 
-    // Listaa reseptit
-    @GetMapping("/")
-    public String listRecipes(Model model) {
-        model.addAttribute("recipes", recipeRepository.findAll());
-        return "recipelist";
-    }
+	// Endpoints
 
-    // Näytä lomake uuden reseptin lisäämiseksi
-    @GetMapping("/addrecipe")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public String addRecipeForm(Model model) {
-        Recipe recipe = new Recipe();
-        recipe.setIngredients(new ArrayList<>());
-        recipe.getIngredients().add(new Ingredient()); // yksi tyhjä rivi valmiiksi
-        model.addAttribute("recipe", recipe);
-        return "addrecipe";
-    }
+	// List all recipes (public)
+	@GetMapping("/")
+	public String listRecipes(Model model) {
+		model.addAttribute("recipes", recipeRepository.findAll());
+		return "recipelist";
+	}
 
-    // Tallenna resepti
-    @PostMapping("/addrecipe")
-    @PreAuthorize("hasAnyRole('ADMIN','USER')")
-    public String saveRecipe(@Valid @ModelAttribute("recipe") Recipe recipe, BindingResult bindingResult, Model model) {
-        if (recipe == null) {
-            throw new IllegalArgumentException("Recipe cannot be null");
-        }
+	// Show form to add a new recipe (USER/ADMIN)
+	@GetMapping("/addrecipe")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public String addRecipeForm(Model model) {
+		Recipe recipe = new Recipe();
+		recipe.setIngredients(new ArrayList<>());
+		recipe.getIngredients().add(new Ingredient()); // add one empty row by default
+		model.addAttribute("recipe", recipe);
+		return "addrecipe";
+	}
 
-        // Server-side validation
-        if (bindingResult.hasErrors()) {
-            // If editing an existing recipe, return edit view, otherwise add view
-            if (recipe.getRecipeId() != null) {
-                model.addAttribute("recipe", recipe);
-                return "editrecipe";
-            }
-            model.addAttribute("recipe", recipe);
-            return "addrecipe";
-        }
+	// Save recipe (create or update)
+	@PostMapping("/addrecipe")
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
+	public String saveRecipe(@Valid @ModelAttribute("recipe") Recipe recipe, BindingResult bindingResult, Model model) {
+		if (recipe == null) {
+			throw new IllegalArgumentException("Recipe cannot be null");
+		}
 
-        if (recipe.getIngredients() != null) {
-            // Poistetaan tyhjät rivit
-            recipe.getIngredients().removeIf(i ->
-                (i.getName() == null || i.getName().isBlank()) &&
-                (i.getAmount() == null || i.getAmount().isBlank()) &&
-                (i.getUnit() == null || i.getUnit().isBlank())
-            );
+		// Server-side validation: return edit or add form accordingly
+		if (bindingResult.hasErrors()) {
+			// If editing an existing recipe, return edit view, otherwise add view
+			if (recipe.getRecipeId() != null) {
+				model.addAttribute("recipe", recipe);
+				return "editrecipe";
+			}
+			model.addAttribute("recipe", recipe);
+			return "addrecipe";
+		}
 
-            // Liitetään resepti kaikille ainesosille
-            recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
-        }
+		if (recipe.getIngredients() != null) {
+			// Remove fully empty ingredient rows
+			recipe.getIngredients().removeIf(i ->
+				(i.getName() == null || i.getName().isBlank()) &&
+				(i.getAmount() == null || i.getAmount().isBlank()) &&
+				(i.getUnit() == null || i.getUnit().isBlank())
+			);
 
-        recipeRepository.save(recipe);
-        return "redirect:/recipe/" + recipe.getRecipeId();
-    }
+			// Link each ingredient back to this recipe
+			recipe.getIngredients().forEach(i -> i.setRecipe(recipe));
+		}
 
-    // Muokkaa reseptiä
-    @GetMapping("/editrecipe/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String editRecipe(@PathVariable("id") Long id, Model model) {
-        if (id == null || !recipeRepository.existsById(id)) {
-            throw new NoSuchElementException("Invalid recipe ID: " + id);
-        }
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
-        model.addAttribute("recipe", recipe);
-        return "editrecipe";
-    }
+		recipeRepository.save(recipe);
+		return "redirect:/recipe/" + recipe.getRecipeId();
+	}
 
-    // Poista resepti
-    @GetMapping("/deleterecipe/{id}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public String deleteRecipe(@PathVariable("id") Long id) {
-        if (id == null || !recipeRepository.existsById(id)) {
-            throw new NoSuchElementException("Invalid recipe ID: " + id);
-        }
-        recipeRepository.deleteById(id);
-        return "redirect:/";
-    }
+	// Edit recipe (ADMIN)
+	@GetMapping("/editrecipe/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public String editRecipe(@PathVariable("id") Long id, Model model) {
+		if (id == null || !recipeRepository.existsById(id)) {
+			throw new NoSuchElementException("Invalid recipe ID: " + id);
+		}
+		Recipe recipe = recipeRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
+		model.addAttribute("recipe", recipe);
+		return "editrecipe";
+	}
 
-    // Näytä yksittäinen resepti
-    @GetMapping("/recipe/{id}")
-    public String viewRecipe(@PathVariable("id") Long id, Model model) {
-        if (id == null || !recipeRepository.existsById(id)) {
-            throw new NoSuchElementException("Invalid recipe ID: " + id);
-        }
-        Recipe recipe = recipeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
-        model.addAttribute("recipe", recipe);
-        return "recipesingle";
-    }
+	// Delete recipe (ADMIN)
+	@GetMapping("/deleterecipe/{id}")
+	@PreAuthorize("hasRole('ADMIN')")
+	public String deleteRecipe(@PathVariable("id") Long id) {
+		if (id == null || !recipeRepository.existsById(id)) {
+			throw new NoSuchElementException("Invalid recipe ID: " + id);
+		}
+		recipeRepository.deleteById(id);
+		return "redirect:/";
+	}
+
+	// View single recipe
+	@GetMapping("/recipe/{id}")
+	public String viewRecipe(@PathVariable("id") Long id, Model model) {
+		if (id == null || !recipeRepository.existsById(id)) {
+			throw new NoSuchElementException("Invalid recipe ID: " + id);
+		}
+		Recipe recipe = recipeRepository.findById(id)
+				.orElseThrow(() -> new NoSuchElementException("Recipe not found: " + id));
+		model.addAttribute("recipe", recipe);
+		return "recipesingle";
+	}
 }

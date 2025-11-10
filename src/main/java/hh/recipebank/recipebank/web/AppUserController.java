@@ -13,48 +13,44 @@ import org.springframework.web.bind.annotation.*;
 import java.util.NoSuchElementException;
 
 @Controller
-@RequestMapping("/users")
 public class AppUserController {
 
+    // Fields
     @Autowired
     private AppUserRepository appUserRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder; // korjattu tyyppi
+    private PasswordEncoder passwordEncoder; 
 
-    // Lista käyttäjistä
-    @GetMapping
+    // Endpoints
+
+    // List users (mapped to /users)
+    @GetMapping("/users")
     public String listUsers(Model model) {
         model.addAttribute("users", appUserRepository.findAll());
         return "userlist";
     }
 
-    // Lisää käyttäjä
-    @GetMapping("/add")
+    // Show add form (prefixed with /users)
+    @GetMapping("/users/add")
     public String addUserForm(Model model) {
         model.addAttribute("user", new AppUser());
         return "adduser";
     }
 
-    // Tallenna käyttäjä
-    @PostMapping("/save")
+    // Save user (prefixed path)
+    @PostMapping("/users/save")
     public String saveUser(@Valid @ModelAttribute("user") AppUser user, BindingResult bindingResult, Model model) {
         if (user == null) {
             throw new IllegalArgumentException("User cannot be null");
         }
-
-        // Server-side validation failures
         if (bindingResult.hasErrors()) {
             return "adduser";
         }
-
-        // Uniikin käyttäjänimen tarkistus
         if (user.getUsername() != null && appUserRepository.existsByUsername(user.getUsername())) {
             bindingResult.rejectValue("username", "user.username.exists", "Käyttäjänimi on jo käytössä");
             return "adduser";
         }
-
-        // Hashataan salasana ennen tallennusta
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         if (user.getRole() == null) {
             user.setRole("ROLE_USER");
@@ -63,13 +59,48 @@ public class AppUserController {
         return "redirect:/users";
     }
 
-    // Poista käyttäjä
-    @GetMapping("/delete/{id}")
+    // Delete user 
+    @GetMapping("/users/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id) {
         if (id == null || !appUserRepository.existsById(id)) {
             throw new NoSuchElementException("Invalid user ID: " + id);
         }
         appUserRepository.deleteById(id);
+        return "redirect:/users";
+    }
+
+    // Admin list 
+    @GetMapping("/admin/users")
+    public String adminUserList(Model model) {
+        model.addAttribute("users", appUserRepository.findAll());
+        return "userlist";
+    }
+
+    // Admin add form 
+    @GetMapping("/admin/users/add")
+    public String addUserFormAdmin(Model model) {
+        model.addAttribute("user", new AppUser());
+        return "adduser";
+    }
+
+    // Admin save 
+    @PostMapping("/admin/users/save")
+    public String saveUserAdmin(@Valid @ModelAttribute("user") AppUser user, BindingResult bindingResult, Model model) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+        if (bindingResult.hasErrors()) {
+            return "adduser";
+        }
+        if (user.getUsername() != null && appUserRepository.existsByUsername(user.getUsername())) {
+            bindingResult.rejectValue("username", "user.username.exists", "Käyttäjänimi on jo käytössä");
+            return "adduser";
+        }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getRole() == null) {
+            user.setRole("ROLE_USER");
+        }
+        appUserRepository.save(user);
         return "redirect:/users";
     }
 }

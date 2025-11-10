@@ -2,10 +2,12 @@ package hh.recipebank.recipebank.domain;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 @Entity
 public class Ingredient {
 
+    // Fields
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long ingredientId;
@@ -15,10 +17,12 @@ public class Ingredient {
     private String amount;
     private String unit;
 
+    // Relationships
     @ManyToOne
-    @JoinColumn(name = "recipe_id")
+    @JsonBackReference("recipe-ingredients")
     private Recipe recipe;
 
+    // Constructors
     public Ingredient() {
     }
 
@@ -35,6 +39,7 @@ public class Ingredient {
         this.recipe = recipe;
     }
 
+    // Getters and setters
     public Long getIngredientId() {
         return ingredientId;
     }
