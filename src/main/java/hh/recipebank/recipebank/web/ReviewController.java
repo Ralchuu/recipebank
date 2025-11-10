@@ -6,7 +6,6 @@ import hh.recipebank.recipebank.domain.ReviewRepository;
 import hh.recipebank.recipebank.domain.RecipeRepository;
 import hh.recipebank.recipebank.domain.AppUser;
 import hh.recipebank.recipebank.domain.AppUserRepository;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;

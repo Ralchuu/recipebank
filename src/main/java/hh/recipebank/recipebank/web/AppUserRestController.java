@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.security.access.prepost.PreAuthorize; 
 import hh.recipebank.recipebank.domain.AppUser;
 import hh.recipebank.recipebank.domain.AppUserRepository;
 
 @CrossOrigin
 @RestController
 @SuppressWarnings("null")
+@PreAuthorize("hasRole('ADMIN')") // restrict all endpoints in this controller to ADMIN
 public class AppUserRestController {
 
 	// Fields

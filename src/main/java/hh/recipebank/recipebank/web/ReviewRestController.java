@@ -3,14 +3,9 @@ package hh.recipebank.recipebank.web;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
-
+import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import hh.recipebank.recipebank.domain.Review;
 import hh.recipebank.recipebank.domain.ReviewRepository;
 import hh.recipebank.recipebank.domain.Recipe;
@@ -21,7 +16,6 @@ import hh.recipebank.recipebank.domain.AppUserRepository;
 @CrossOrigin
 @RestController
 @SuppressWarnings("null")
-
 public class ReviewRestController {
 
 	// Fields
@@ -31,39 +25,57 @@ public class ReviewRestController {
 
 	// Constructors
 	public ReviewRestController(ReviewRepository reviewRepository,
-		RecipeRepository recipeRepository,
-		AppUserRepository appUserRepository) {
+	                            RecipeRepository recipeRepository,
+	                            AppUserRepository appUserRepository) {
 		this.reviewRepository = reviewRepository;
 		this.recipeRepository = recipeRepository;
 		this.appUserRepository = appUserRepository;
 	}
 
-	// Endpoints
+	// GET: all reviews (public)
 	@GetMapping("/api/reviews")
 	public List<Review> getAllReviews() {
 		return reviewRepository.findAll();
 	}
 
+	// GET: single review (public)
 	@GetMapping("/api/reviews/{id}")
-	public Optional<Review> getReview(@PathVariable long id) {
-		return reviewRepository.findById(id);
+	public ResponseEntity<Review> getReview(@PathVariable long id) {
+		return reviewRepository.findById(id)
+			.map(ResponseEntity::ok)
+			.orElse(ResponseEntity.notFound().build());
 	}
 
+	// POST: create review (USER or ADMIN)
+	@PreAuthorize("hasAnyRole('ADMIN','USER')")
 	@PostMapping("/api/reviews")
-	public Review createReview(@RequestBody Review review) {
+	public ResponseEntity<Review> createReview(@RequestBody Review review) {
+		// Attach recipe if provided
 		Recipe r = review.getRecipe();
 		if (r != null && r.getRecipeId() != null) {
-			recipeRepository.findById(r.getRecipeId()).ifPresent(review::setRecipe);
+			Optional<Recipe> recipeOpt = recipeRepository.findById(r.getRecipeId());
+			recipeOpt.ifPresent(review::setRecipe);
+		} else {
+			return ResponseEntity.badRequest().build();
 		}
+		// Attach user if provided (optional)
 		AppUser u = review.getUser();
 		if (u != null && u.getUserId() != null) {
 			appUserRepository.findById(u.getUserId()).ifPresent(review::setUser);
 		}
-		return reviewRepository.save(review);
+
+		Review saved = reviewRepository.save(review);
+		return ResponseEntity.ok(saved);
 	}
 
+	// DELETE: remove review (ADMIN only)
+	@PreAuthorize("hasRole('ADMIN')")
 	@DeleteMapping("/api/reviews/{id}")
-	public void deleteReview(@PathVariable long id) {
+	public ResponseEntity<Void> deleteReview(@PathVariable long id) {
+		if (!reviewRepository.existsById(id)) {
+			return ResponseEntity.notFound().build();
+		}
 		reviewRepository.deleteById(id);
+		return ResponseEntity.noContent().build();
 	}
 }
