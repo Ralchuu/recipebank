@@ -27,7 +27,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    @JsonIgnore // keep review->user out of JSON to avoid large nested graphs
+    @JsonIgnore 
     private AppUser user;
 
     // Constructors
